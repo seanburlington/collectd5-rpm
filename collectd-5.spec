@@ -12,8 +12,12 @@ BuildRequires:	net-snmp-devel, libstatgrab-devel, libxml2-devel
 BuildRequires:	yajl-devel, libiptcdata-devel, java-1.6.0-openjdk-devel
 BuildRequires:	curl-devel, libidn-devel, openssl-devel, iptables-devel
 BuildRequires:	python-devel, ipvsadm, kernel-headers, bison, pkgconfig, flex, autoconf, libtool, libgcrypt-devel
-BuildRequires:  libdbi-devel, libesmtp-devel, libmemcache-devel, libmemcached-devel, libnfnetlink-devel
+BuildRequires:  libdbi-devel, libesmtp-devel, libmemcached-devel, libnfnetlink-devel
 BuildRequires:  libnotify-devel, OpenIPMI-devel, liboping-devel, varnish-libs-devel, libvirt-devel, protobuf-devel
+
+
+#BuildRequires: libcurl libcurl-devel rrdtool rrdtool-devel rrdtool-perl libgcrypt-devel gcc make gcc-c++
+ 
 Packager:	Gianluca Varisco <gianluca.varisco@gmail.com>
 Vendor:		collectd development team <collectd@verplant.org>
 
@@ -136,23 +140,15 @@ Requires:	collectd = %{version}, net-snmp
 %description snmp
 This plugin for collectd allows querying of network equipment using SNMP.
 
-%package java
-Summary:	java-module for collectd.
-Group:		System Environment/Daemons
-Requires:	collectd = %{version}, java-1.6.0-openjdk-devel >= 1.6
-BuildRequires:	java-1.6.0-openjdk-devel >= 1.6
-%description java
-This plugin for collectd allows plugins to be written in Java and executed
-in an embedded JVM.
+
 
 %prep
 rm -rf $RPM_BUILD_ROOT
 %setup
 
 %build
-export JAVA_HOME=/usr/lib/jvm/java-1.6.0-openjdk-1.6.0.0.%{_arch}
-export PATH=$PATH:$JAVA_HOME/bin
-./configure --prefix=%{_prefix} --sbindir=%{_sbindir} --mandir=%{_mandir} --libdir=%{_libdir} --sysconfdir=%{_sysconfdir} --with-java=$JAVA_HOME --enable-java --disable-battery
+
+./configure --prefix=%{_prefix} --sbindir=%{_sbindir} --mandir=%{_mandir} --libdir=%{_libdir} --sysconfdir=%{_sysconfdir} --disable-battery --disable-amqp
 make
 
 %install
@@ -333,13 +329,25 @@ exit 0
 
 %exclude /usr/share/collectd/postgresql_default.conf
 
+# RPM complained these weren't listed (I'm just trying to get a basic build)
+
+%exclude %{_libdir}/collectd/gmond.a
+%exclude %{_libdir}/collectd/gmond.la
+%exclude %{_libdir}/collectd/gmond.so
+%exclude %{_libdir}/collectd/nut.a
+%exclude %{_libdir}/collectd/nut.la
+%exclude %{_libdir}/collectd/nut.so
+%exclude %{_libdir}/collectd/pinba.a
+%exclude %{_libdir}/collectd/pinba.la
+%exclude %{_libdir}/collectd/pinba.so
+%exclude %{_libdir}/collectd/postgresql.a
+%exclude %{_libdir}/collectd/postgresql.la
+%exclude %{_libdir}/collectd/postgresql.so
+
+
 %dir /var/lib/collectd
 
-#%if %with_java
-%files java
-%attr(0644,root,root) /usr/share/%{name}/java/*.jar
-%plugin_macro java
-#%endif
+
 
 %files apache
 %config %attr(0644,root,root) /etc/collectd.d/apache.conf
